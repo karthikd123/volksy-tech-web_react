@@ -1,6 +1,7 @@
-'use strict';
-const $ = require('jquery');
+// interesting jquery import thanks to babel
+import $ from 'jquery';
 
-$('body').append('Holberton Dashboard');
-$('body').append('Dashboard data for the students');
-$('body').append('Copyright - Holberton School');
+// add three different p tags to body
+$('body').append('<p>Holberton Dashboard</p>');
+$('body').append('<p>Dashboard data for the students</p>');
+$('body').append('<p>Copyright - Holberton School</p>');
