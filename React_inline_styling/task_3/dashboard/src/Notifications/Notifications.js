@@ -1,78 +1,119 @@
-import React from 'react';
+import React, { Component, Fragment } from 'react';
+import close_icon from '../assets/close-icon.png';
+import NotificationItem from './NotificationItem';
 import PropTypes from 'prop-types';
+import NotificationItemShape from './NotificationItemShape';
 import { StyleSheet, css } from 'aphrodite';
 
-class NotificationItem extends React.PureComponent {
+class Notifications extends Component {
   constructor(props) {
     super(props);
+    this.markAsRead = this.markAsRead.bind(this);
   }
+  markAsRead(id) {
+    console.log(`Notification ${id} has been marked as read`);
+  }
+  shouldComponentUpdate(nextProps) {
+    return (
+      nextProps.listNotifications.length > this.props.listNotifications.length
+    );
+  }
+
   render() {
-    const { type, html, value, markAsRead, id } = this.props;
-    const color = css(type === 'urgent' ? styles.urgent : styles.default);
-    let li;
-
-    value
-      ? (li = (
-          <li
-            className={color}
-            data-notification-type={type}
-            onClick={() => markAsRead(id)}
-          >
-            {value}
-          </li>
-        ))
-      : (li = (
-          <li
-            className={color}
-            data-notification-type={type}
-            dangerouslySetInnerHTML={html}
-            onClick={() => markAsRead(id)}
-          ></li>
-        ));
-
-    return li;
+    const { displayDrawer, listNotifications } = this.props;
+    const show = css(displayDrawer ? styles.showOff : styles.showOn);
+    return (
+      <Fragment>
+        <div className={css(styles.menuItem)}>
+          <p className={show}>Your notifications</p>
+        </div>
+        {displayDrawer && (
+          <div className={css(styles.notifications)}>
+            <p>Here is the list of notifications</p>
+            <ul>
+              {listNotifications.length === 0 && (
+                <NotificationItem value='No new notification for now' />
+              )}
+              {listNotifications.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  type={notification.type}
+                  value={notification.value}
+                  html={notification.html}
+                  markAsRead={this.markAsRead}
+                />
+              ))}
+            </ul>
+            <button
+              type='button'
+              aria-label='Close'
+              onClick={() => console.log('Close button has been clicked')}
+              style={{
+                display: 'inline-block',
+                position: 'absolute',
+                top: '56px',
+                right: '16px',
+                background: 0,
+                border: 0,
+                outline: 'none',
+                cursor: 'pointer',
+                zIndex: 1,
+              }}
+            >
+              <img
+                src={close_icon}
+                alt=''
+                style={{ width: '8px', height: '8px' }}
+              />
+            </button>
+          </div>
+        )}
+      </Fragment>
+    );
   }
 }
 
-NotificationItem.defaultProps = {
-  type: 'default',
-  html: {},
-  value: '',
-  markAsRead: () => {},
-  id: NaN,
+Notifications.defaultProps = {
+  displayDrawer: false,
+  listNotifications: [],
 };
 
-NotificationItem.propTypes = {
-  type: PropTypes.string,
-  html: PropTypes.shape({
-    __html: PropTypes.string,
-  }),
-  value: PropTypes.string,
-  markAsRead: PropTypes.func,
-  id: PropTypes.number,
+Notifications.propTypes = {
+  displayDrawer: PropTypes.bool,
+  listNotifications: PropTypes.arrayOf(NotificationItemShape),
 };
 
 const screenSize = {
   small: '@media screen and (max-width: 900px)',
 };
 
-const onSmall = {
-  fontSize: '20px',
-  padding: '10px 8px',
-  borderBottom: '1px solid black',
-  listStyle: 'none',
-};
-
 const styles = StyleSheet.create({
-  default: {
-    color: 'blue',
-    [screenSize.small]: onSmall,
+  notifications: {
+    fontSize: '20px',
+    border: 'thin dotted #e0344a',
+    padding: '4px 16px',
+    float: 'right',
+    [screenSize.small]: {
+      width: '90%',
+      border: 'none',
+      backgroundColor: 'white',
+    },
+  },
+  menuItem: {
+    textAlign: 'right',
+    marginRight: '16px',
+    [screenSize.small]: {},
+  },
+  showOff: {
+    marginRight: '8px',
+    [screenSize.small]: {
+      display: 'none',
+    },
   },
 
-  urgent: {
-    color: 'red',
-    [screenSize.small]: onSmall,
+  showOn: {
+    marginRight: '8px',
   },
 });
 
-export default NotificationItem;
+export default Notifications;
